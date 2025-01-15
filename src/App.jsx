@@ -48,24 +48,38 @@ export default function App() {
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
-      return
+      setError('Geolocation is not supported by your browser');
+      return;
     }
-
-    setLoading(true)
+  
+    setLoading(true);
+  
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        fetchWeatherByCoords(
-          position.coords.latitude,
-          position.coords.longitude
-        )
+        console.log('Geolocation success:', position.coords);
+        fetchWeatherByCoords(position.coords.latitude, position.coords.longitude);
       },
-      (err) => {
-        setError('Unable to retrieve your location')
-        setLoading(false)
+      (error) => {
+        setLoading(false);
+        console.error('Geolocation error:', error);
+  
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setError('Permission denied. Please allow location access.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setError('Position unavailable. Try again later.');
+            break;
+          case error.TIMEOUT:
+            setError('Location request timed out. Please try again.');
+            break;
+          default:
+            setError('An unknown error occurred.');
+        }
       }
-    )
-  }
+    );
+  };
+  
 
   const toggleFavorite = (city) => {
     setFavorites(prev => {
